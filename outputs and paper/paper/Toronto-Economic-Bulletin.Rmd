@@ -1,0 +1,191 @@
+---
+title: Covid-19 Has Helped Achieve stability between Unemployment Rate and Actual
+  Hours Worked in Toronto ^[Code and data are available at; https://github.com/Mikmok14/Toronto-Unemployment-and-WOrk-Hours-2019---2021.git]
+author: "Marco Chau"
+contact: "marco.chau@mail.utoronto.ca"
+date: "16 January 2022"
+output:
+  bookdown::pdf_document2:
+header-includes:
+  \usepackage{float}
+  \floatplacement{figure}{H}
+toc = FALSE:
+abstract: Data about the unemployment rate and actual hours worked per week in Toronto
+  were retrieved from the Open Data Portal of Toronto to examine the impact of
+  Covid-19 on unemployment, actual work hours and their relationship. Although both unemployment
+  and work hours heavily fluctuated before and during the early stages of the pandemic,
+  rates of change slow down significantly during the reopening of Ontario. Although
+  unemployment and work hours are important metrics for assessing the health of the
+  labour market, they are a far cry from a complete representation of the labour economy
+  due to missed demographics and the multitude of economic variables that were held
+  constant in this model.
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.pos = "!H", echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+load("employ_work_dat.Rda")
+```
+
+# Introduction
+
+The Covid-19 Pandemic has caused effects in the global economy that has not been seen since the financial crisis of 2007-08. In response to this crisis, Canada has spent upwards of $600 billion in assisting both individuals and businesses with recovery from the impact the pandemic ^[@responseplanref]. Two years after the beginning of the pandemic, the state of the Canadian economy remains capricious as the gross domestic product remains lower than pre-pandemic levels and further market-restricting lockdowns remain a possibility. Beyond the reduction of real GDP on a national level, the pandemic has also caused changes in labour-force patterns in economic hubs in Canada such as Toronto. Changes in these labour-force patterns have broader implications on the fiscal and economic policy that the provincial and federal government may choose to adopt as the pandemic continues to progress.     
+
+ 
+Through an analysis of the unemployment rate and hours worked before the pandemic, during the first-wave lockdown, and during stage-3 reopening, this paper aims to investigate the impact and aftermath of the pandemic on the labour force. This report begins with an analysis on the methodology that was used to collect and present the unemployment rate and actual hours worked in the city of Toronto and an acknowledgement on the blind spots this may cause (section \@ref(data)). The data is then presented in both tabular (section \@ref(tables)) and graphical (section \@ref(graphs)) form to present both granular details and overall trends. The tables are then used to highlight key observations of unemployment, hours worked, and their rates of change in 2019, 2020, and 2021 discretely to provide a snapshot of the pre-pandemic, initial lockdown, and reopening economies (section \@ref(table-results)). I will then present the trends of unemployment, hours worked, and their rates of change as independent variables from 2019 - 2021 to see how they evolved overtime (section \@ref(graph-results)). These findings are then used to hypothesize the interdependent relationship between unemployment and actual work hours and the impact of the Covid-19 pandemic on stabilizing this relationship (section \@ref(discussion)).      
+
+## Defining terms
+In Canada, the unemployment rate is defined as the percentage of the labour force that do not have jobs and are available to work and are actively seeking work ^[@labourref]. The labour force in Canada is comprised of people 15 and over who are either working (employed) or looking for work (unemployed). The actual hours worked variable is derived using a reference week which is usually the week containing the 15th of the month. This includes paid and unpaid hours as well as overtime. Stage-3 reopening refers to the Ontario government's easing of restrictions which permitted the reopening of consumer businesses with the requirement of physical distancing ^[@stage3ref].   
+
+# Data
+
+## Scope
+To analyze the relationship between unemployment rate and average weekly hours worked and the impact of the Covid-19 pandemic on the labour force, I downloaded data from the City of Toronto Open Data portal using the R package opendatatoronto ^[@opendatatorontoref]. The data file was last refreshed on February 2nd 2022, however the data used in this analysis only stretches to September 2021. The raw package includes data that the city deems as key indicators for Toronto's economic health and performance. The raw data includes measures of unemployment rate, number of personal and commercial bankruptcies filed, revenue from sales of recycled materials, average price of homes in the city, revenues of the Toronto Transit Commission, and more. The data this report is concerned with is the unemployment rate and average weekly hours worked. This data was collected by Statistics Canada as part of the monthly Labour Force Survey. The survey is used to measure a variety of metrics to inform economic and fiscal policy decisions. The data was cleaned using the `R programming language` ^[@Rref] and packages for R including `tidyverse` ^[@tidyverseref], `ggplot2` ^[@ggplotref], `lubridate` ^[@lubridateref], `kableExtra` ^[@kableExtraref], and `dplyr` ^[@dplyrref].  
+
+## Source
+The primary source of the data, the Labour Force Survey, is a mandatory survey enforced by the Statistics Act ^[R.S.C., 1985, c. S-19]. It is conducted by the national statistics agency of Canada. Failure to respond to the survey without providing an acceptable reason can lead to a fine up to $500 and/or imprisonment up to 3 months. The survey is administered to citizens 15 years old and up with exceptions. The Labour Force Survey uses a sample size of 56,000 households, which approximately amounts to 100,000 individuals. Households are chosen based on the geographical clusters that the government artificially creates to be representative of each province and their cities. The survey itself is conducted by an interviewer who transcribes the responses to a digital platform which is then sent to Ottawa. The respondent is responsible for conveying information about themselves and everyone else in their household.   
+
+## Biases
+The data is not a perfect representation of the unemployment rate and workload of employees due to the collection methodology, and the exclusion of groups not captured by the sample population. Households in remote areas with low population density are excluded by the geographic clustering. Full-time members of the armed forces and citizens living in Aboriginal Reserves are also excluded from the survey. The survey also misses members of the informal labour market, which includes but is not limited to people working cash jobs, and children under 15 with jobs. The Bank of Canada estimates that in 2018, roughly 3.5% of the labour force were engaged in informal full-time work which translates to around 700,000 people ^[@bankcanref]. This data set also neglects discouraged workers, which are unemployed people who have not attempted to look for a job within the last 4 weeks. This leads to further under-reporting of the unemployment rate. The Labour Force Survey data also does not consider how many hours respondents work at side-jobs and whether people have more than one job. The data in the survey is also self-reported, so numbers such as weekly-work-hours are estimations rather than exact representations of actual hours worked. 65% of the data collected is reported second-hand by the household member being interviewed leading to possible discrepancies. Since the data collected by the survey is used to make important economic and fiscal policies such as the expansion of unemployment benefits (EI) or changes in the minimum wage, the exclusion of already underrepresented and exploited groups may lead to erroneous and biased policy implementation. 
+
+## Tables and Graphs Preface
+Tables \@ref(tab:2019t), \@ref(tab:2020t), and \@ref(tab:2021t) lists the Unemployment rate, weekly hours worked, and their rates of change for 2019, 2020, and 2021 respectively. The granular numbers in these tables are useful for more detailed analysis of the visual representations of the same data found in Figures \@ref(fig:unemploymentfig), \@ref(fig:workhoursfig), and \@ref(fig:rocfig). Figure \@ref(fig:rocfig) combines the line graphs for both unemployment and hours worked rates of change so patterns are more easily recognized. In a bare bones model of the world where labour is only affected by the number of workers, we expect there to be a negative relationship between the unemployment rate and hours worked; as there are less workers, people who still have jobs need to work more. 
+
+## Tables
+```{r 2019t, out.extra = '',echo = FALSE}
+### Constructing Table for 2019 ###
+employ_work_dat|>
+  filter(Year %in%(2019))|>
+  select(Year, Month, Unemployment_Rate, Average_Work_Hours, Unemployment_ROC, Workhours_ROC)|>
+  knitr::kable(
+    caption = "Unemployment Rate and Average Hours Worked Weekly in Toronto 2019",
+    col.names = c("Year", "Month", "Unemployment Rate", "Weekly Hours Worked", "Unemployment ROC", "Hours Worked ROC"),
+    booktabs = TRUE,
+    linesep = "",
+    align = c('c', 'c', 'c', 'c', 'c', 'c'),
+  ) |>
+  kable_styling(latex_options = "HOLD_position")|>
+  column_spec(1:6, color = "black")|>
+  row_spec(0, color = "black")
+```
+
+
+
+
+```{r 2020t, echo = FALSE}
+### Constructing Table for 2020 ###
+employ_work_dat|>
+  filter(Year %in%(2020))|>
+  select(Year, Month, Unemployment_Rate, Average_Work_Hours, Unemployment_ROC, Workhours_ROC)|>
+  knitr::kable(
+    caption = "Unemployment Rate and Average Hours Worked Weekly in Toronto 2020",
+    col.names = c("Year", "Month", "Unemployment Rate", "Weekly Hours Worked", "Unemployment ROC", "Hours Worked ROC"),
+    booktabs = TRUE,
+    linesep = "",
+    align = c('c', 'c', 'c', 'c', 'c', 'c'),
+  ) |>
+  kable_styling(latex_options = "HOLD_position")|>
+  column_spec(1:6, color = "black")|>
+  row_spec(0, color = "black")
+```
+
+```{r 2021t, echo = FALSE}
+### constructing table for 2021 ###
+employ_work_dat|>
+  filter(Year %in%(2021))|>
+  select(Year, Month, Unemployment_Rate, Average_Work_Hours, Unemployment_ROC, Workhours_ROC)|>
+  knitr::kable(
+    caption = "Unemployment Rate and Average Hours Worked Weekly in Toronto 2021",
+    col.names = c("Year", "Month", "Unemployment Rate", "Weekly Hours Worked", "Unemployment ROC", "Hours Worked ROC"),
+    booktabs = TRUE,
+    linesep = "",
+    align = c('c', 'c', 'c', 'c', 'c', 'c'),
+  ) |>
+  kable_styling(latex_options = "HOLD_position")|>
+  column_spec(1:6, color = "black")|>
+  row_spec(0, color ="black")
+```
+
+### Table Results
+
+Table \@ref(tab:2019t) shows data for 2019 and serves as a benchmark for a pre-Covid pandemic snapshot of the labour force. The unemployment rate hovers around 6%, ranging from 5.6% in July and maxing out at 7.34% in March. There are large fluctuations in the rate of change from Marco to April, going from +8.10% to -2.72% and July to August which changes from -4.60% to +11.25%. These fluctuations may be due to the market over-correcting as it tries to reach the natural rate of unemployment. The average number of hours worked per week ranges from a low of 31.03 hours to a high of 36.41 hours. 
+
+Table \@ref(tab:2020t) shows the same data but for 2020. The first quarter of the year tells a similar story to 2019, with unemployment rate ranging from 6.66% to 8.46% and actual hours worked ranging from 35.20 to 35.93. As the year progresses, unemployment rate trends drastically upwards for a period of 3 months, going up by +18.99% from March to April and +28.96% from April to May. There are no major fluctuations in the amount of hours worked. 
+
+Table \@ref(tab:2021t), the data for 2021 up to September, the unemployment rate starts trending downwards in the 2nd quarter, however it is still higher than the highest unemployment rate in 2019. The lowest unemployment rate in 2021 being 8.66% and the highest in 2019 being 7.34%. The rate of change in unemployment is lower than in 2021, meaning the decrease in unemployment is much slower than the increase in 2020.
+
+## Graphs
+```{r unemploymentfig, fig.cap="Unemployment Rate in Toronto 2019 - 2021", echo = FALSE}
+### Constructing Unemployment Graph ###
+  ggplot(employ_work_dat, 
+         mapping = aes (x = Date,
+                        y = Unemployment_Rate)) +
+  theme_bw()+
+  scale_x_date(date_breaks = "month",date_labels = "%b %Y", expand = c(0,0)) +
+  geom_line(colour = "blue") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5,  hjust = 1)) +
+  labs(title = "Unemployment Rate in Toronto 2019 - 2021",
+       x = "Date",
+       y = "Unemployment Rate in %"
+       ) 
+```
+
+```{r workhoursfig, fig.cap = "Average Weekly Work Hours in Toronto 2019 - 2021", echo = FALSE}
+###Constructing Work hours graph###
+  ggplot(employ_work_dat, 
+         mapping = aes (x = Date,
+              y = Average_Work_Hours, group = 1)) +
+  theme_bw()+
+  scale_x_date(date_breaks = "month",date_labels = "%b %Y", expand = c(0,0)) +
+  geom_line(colour = "red") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,  hjust = 1)) +
+  labs(title = "Average Weekly Work Hours in Toronto 2019 - 2021", 
+       x = "Date",
+       y = "Hours Worked"
+       )
+```
+
+```{r rocfig, fig.cap = "Rate of Change of Unemployment Rate and Work Hours", echo = FALSE}
+### Constructing Rates of Change Graph ###
+ggplot(employ_work_dat) +
+  geom_line(aes(x = Date, y = Workhours_ROC, colour = "Work Hours"), size = 0.5) +
+  geom_line(aes(x = Date, y = Unemployment_ROC, colour = "Unemployment Rate"), size = 0.5) +
+  theme_bw()+
+  scale_x_date(date_breaks = "month",date_labels = "%b %Y", expand = c(0,0)) +
+  scale_colour_manual(name = "Data type", values = c("Work Hours" = "red", "Unemployment Rate" = "blue")) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,  hjust = 1)) +
+  labs(title = "Rate of change of Unemployment Rate and Work Hours", 
+       x = "Date",
+       y = "Rate of Change"
+       )
+```
+
+### Graph Results
+
+Figure \@ref(fig:unemploymentfig) visualizes the unemployment rate from 2019 to 2021 in a continuous graph. Here we see an sharp upward trend starting in March of 2020 and reaches an apex in August of 2020 before declining. This continuous upward trend in unemployment in 2020 lasted a period of 6 months. The increase in unemployment in March coincides with the declaration of a state of emergency by the government of Ontario as the country began to enter a lockdown due to the pandemic. The decline in unemployment in August of 2020 is accompanied by the stage 3 reopening measures that eased pandemic restrictions in Ontario.  The decline un unemployment rate is not as continuous, rising from November 2020 to January 2021 and again in May 2021 to July 2021 though a general downward trend is noticeable. Despite this downward trend, however, the minimum unemployment rates in 2020 and 2021 are higher than the values found in 2019. The peak unemployment rate in 2020 is almost double the unemployment rate in 2019 suggesting a general increase in the unemployment rate that was slowly levelling off as 2021 progressed. 
+
+The visualization shown in figure \@ref(fig:workhoursfig) of average actual hours worked from 2019 - 2021 shows a fluctuating data set with no immediately obvious trends. There is a sharp decline in hours worked between March and April of 2019 and a sharp increase immediately after between April and May of 2019. As shown previously, between March and April, unemployment sharply increased. This means between March and April, there was job-loss and a decline in actual work hours as well during the beginning of the Covid-19 pandemic. This pattern of sharp decrease and rebound occurs again, with the decline starting in September 2019 and the rebound occurring in October 2019. The troughs in 2020 and 2021 are noticeably higher than the troughs in 2019. The peaks in 2019, 2020, and 2021 are roughly the same with May 2020 being the exception. 
+
+Figure \@ref(fig:rocfig) juxtaposes the rates of change in actual work hours and the unemployment rate on the same graph. From January of 2019 to April of 2012, the amount of work hours and unemployment rose and fell in tandem. However, from April to May 2019 the amount of work hours increased quickly. Between August 2019 and October 2019 as unemployment sped up, and peaked, work hours increased slightly. As the speed of unemployment went down, the amount of work hours followed and decreased as well. Once work hours rebounded and hits a peak in November of 2019, and starts dropping again, the unemployment rate goes down as well. In March 2020, the rate of change of unemployment sharply increases, the rate of change of hours worked increases as well. After September 2020, the rates of change of both hours worked and unemployment fluctuate above and below 0%, but largely remains level and experienced less dramatic spikes and troughs than before. 
+
+# Discussion
+
+The erratic and polarizing rates of change in unemployment rate and hours worked between April 2019 and February 2020, the period before the Covid-19 pandemic caused a nationwide lockdown in Canada,  suggests that an external shock to the labour market caused a loss of equilibrium. In theory, when the labour market is in equilibrium and all other economic variables are held constant, we would expect a rise or fall in unemployment rate or actual hours worked to cause each other to rise and fall shortly thereafter. The market would then react to this shock by increasing or decreasing the other variable. For example, a sudden rise in demand that overwhelms a firm would lead to workers having to work more hours. The firm then reacts to this increase in hours by hiring more employees, thereby lowering the unemployment rate. This then restores the market to equilibrium through a negative correlation between unemployment and work hours. As noted by Richard Rogerson, the degree of this relationship is usually around -0.58^[@unemployworkhoursref]. A shock to equilibrium can be observed in figure \@ref(fig:rocfig) in January 2019 as the unemployment rate and hours worked rose. This shock led to a correction by firms as both work hours and unemployment rate fall in March of 2019. This correction fails however shown by the sharp increase in work hours start in April 2019 despite a decrease in unemployment at the same time. The market naturally tries to readjust by continuing to employ more workers, note in figure \@ref(fig:unemploymentfig) unemployment continues to decrease from April 2019 to July of 2019; firms were hiring more workers to reduce the workload of pre-existing employees. There is, however, an overreaction as the rates of changes between unemployment and hours worked rebound and cross in July of 2019. At this point we would expect their rates of change to stabilize as work hours and the number of employees have reached a balance. However unemployment and work hours continue to rise until August of 2019. Firms realize that employees were being excessively fired as the workload on existing employees increased and begin hiring again, reducing unemployment rate. This erratic rise and fall of the rates of change between January of 2019 and January 2020 seen in figure \@ref(fig:rocfig) tells the story of a labour market that is over correcting for shocks and failing to reach equilibrium.    
+
+The dramatic increase in the unemployment rate in March of 2019 shown in figure \@ref(fig:unemploymentfig) confirms expectations that the first wave of the Covid-19 pandemic and the lockdown of the city led to a dramatic loss of jobs. Figure \@ref(fig:rocfig) shows that the speed of unemployment was unprecedented in the reference year of 2019 and dramatically higher than previous rates of increase. The period between March and May is also a period where post-secondary students graduate and enter the labour force. As noted by Blustein et al, "as reflected in a recent International Labor Organization (2020a) report... youth were already vulnerable within the workforce prior to the crisis.. With vast increases in unemployment (and competition between workers)... may result in a major dislocation of young workers from the labour market for some time." ^[@unemploymentcovidref]. With demand for labour already in decline, the expansion of the labour force from these fresh graduates exacerbated the increase in unemployment. After a sharp increase in the unemployment rate seen in \@ref(fig:unemploymentfig), figure \@ref(fig:workhoursfig) shows an increase of work hours as well in March 2019, as expected, however the speed of increase in hours worked in figure \@ref(fig:rocfig) is not as high as expected. Although workers were losing employment rapidly, work hours only increased slightly. This difference in rates of change suggests that although unemployment and work hours are correlated, there are likely other market forces at play. These market forces could be an increase in efficiency of the existing workers, or a decrease in demand. The impact of working from home on productivity is mixed, with productivity increasing for those most emotionally impacted by Covid-19 and productivity decreasing as the age of workers increases ^[@wfhref]. A more likely cause for the slow increase in work hours is the reduction in demand as in-person stores were forced to close.     
+
+The patterned and cyclical but mild fluctuations of the rate of change for both the unemployment rate and hours worked past September 2020 is a sign of the labour market being close to finding the equilibrium in the first recovery period of the pandemic. The speed increase of unemployment rate and the increase in hours worked despite the reduction in demand shows an overreaction of the market during the beginning of the pandemic. Figure \@ref(fig:workhoursfig) shows that the amount of hours worked reaches an all-time-high between April and May during which extensive layoffs were happening. In response, the rise in unemployment slows down in May as well. Changes in the labour market usually manifest in the medium-run, especially for new employment since employers have to advertise positions, wait for applications, interview applicants, and arrange for training. The over-adjustment of unemployment in March and April is not corrected until August and September, sped up by stage 3 reopening of Ontario at the time which lifted most pandemic restrictions. The mild fluctuations past September 2020 suggests that the labour market had adjusted to living with Covid-19 as the rates of change go lower than 0% by no less than -5.35% in February 2021 as shown in table \@ref(tab:2021t) and no more than +4.93% in March 2021 also shown in table \@ref(tab:2021t) for work hours. The rate of change for unemployment similarly does not go below -8.17% in November 2020 as shown in table \@ref(tab:2021t) and +1.89% in January 2021 also shown in table \@ref(tab:2021t). This reduction in rates of change during the reopening of Ontario could be a result of more conscious and deliberate hiring and firing decisions. Firms may have tightened their management of labour and human resources as fiscal responsibilities became more important after the impact of the first lockdown. As the unemployment rate became more stable, the division of labour between employees becomes more constant as well, leading to more consistent hours of work.   
+
+ This report focused on two economic variables, unemployment and actual hours worked, in Toronto to elucidate the state of the labour market at the tail-end of the first lockdown. The findings about the stabilizing the effect that pandemic has own the labour market after the first reopening may yield similar results as Ontario goes through subsequent phases of lockdowns and reopening as the pandemic progresses. Although this analysis of the labour market during three pivotal stages of the Covid-19 pandemic, it is important to note that the economy is impacted by an immeasurable number of variables that may play a bigger role than the ones discussed here in future lockdowns and reopening of Ontario. 
+
+\newpage
+
+# References
